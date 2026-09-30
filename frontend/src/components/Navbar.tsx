@@ -1,13 +1,11 @@
 import Wordmark from './Wordmark'
-import { navigate } from '../router'
 import { useStore } from '../store'
 
 const LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/lab', label: 'Ingest Lab' },
-  { href: '/#console', label: 'Console' },
-  { href: '/#how-it-works', label: 'How it works' },
-  { href: '/#benchmark', label: 'Benchmark' },
+  { href: '#hero', label: 'Home' },
+  { href: '#how-it-works', label: 'How it works' },
+  { href: '#console', label: 'Console' },
+  { href: '#benchmark', label: 'Benchmark' },
   { href: 'https://chronomem.vercel.app/', label: 'See how it works', external: true },
 ]
 
@@ -20,18 +18,9 @@ export default function Navbar() {
       return
     }
     ev.preventDefault()
-    if (href.includes('#')) {
-      // section anchor: go home first if needed, then scroll
-      const [path, hash] = href.split('#')
-      if (window.location.pathname !== path) {
-        navigate('/')
-        setTimeout(() => document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' }), 60)
-      } else {
-        document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' })
-      }
-    } else {
-      navigate(href)
-      window.scrollTo(0, 0)
+    const element = document.getElementById(href.replace('#', ''))
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
@@ -40,8 +29,8 @@ export default function Navbar() {
       <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6" aria-label="Main">
         <div className="flex items-center gap-3">
           <a
-            href="/"
-            onClick={(e) => onClick('/', e)}
+            href="#hero"
+            onClick={(e) => onClick('#hero', e)}
             className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
           >
             <Wordmark />
@@ -70,11 +59,11 @@ export default function Navbar() {
           ))}
         </div>
         <a
-          href="/lab"
-          onClick={(e) => onClick('/lab', e)}
+          href="#console"
+          onClick={(e) => onClick('#console', e)}
           className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-black transition-colors hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
         >
-          Open Ingest Lab
+          Open Console
         </a>
       </nav>
     </header>
