@@ -8,13 +8,36 @@ Every LLM call and node has a token cost tracked in a ledger.
 
 ## Stack
 
+**Backend:**
 - Python 3.11+, FastAPI, Pydantic v2
 - SQLAlchemy + SQLite
 - NumPy, NetworkX, scikit-learn (TF-IDF flat_rag)
 - Anthropic Python SDK (model from `LLM_MODEL`, key from `ANTHROPIC_API_KEY`)
 
+**Frontend:**
+- React 19, TypeScript, Vite
+- Three.js, React Three Fiber
+- Tailwind CSS v4
+- Zustand (state management)
+
 ## Run
 
+### Quick Start (Full Stack)
+
+```bash
+# Start both backend and frontend with one command
+bash start.sh
+```
+
+This will:
+- Start the FastAPI backend on http://localhost:8000
+- Start the Vite frontend on http://localhost:5173
+- Seed the demo graph with 28 nodes
+- Open the frontend in your browser
+
+### Manual Setup
+
+**Backend:**
 ```bash
 python3.11 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -22,7 +45,15 @@ cp .env.example .env   # then set ANTHROPIC_API_KEY (and LLM_MODEL if desired)
 uvicorn app.main:app --reload --port 8000
 ```
 
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
 Interactive API docs: http://localhost:8000/docs
+Frontend: http://localhost:5173
 CORS is enabled for http://localhost:5173 (`CORS_ORIGINS` env var).
 
 ## Quick tour
@@ -100,3 +131,12 @@ python -m pytest tests/ -v   # 40 tests: supersession, time-aware retrieval,
 - [x] Step 5 — `/bubble` + influence scores
 - [x] Step 6 — `/seed` + `/benchmark/run`
 - [x] Step 7 — Hash chain + tamper detection tests
+- [x] Step 8 — Interactive 3D frontend with React + Three.js
+- [x] Step 9 — "See how it works" link to live demo
+
+## Recent Changes
+
+- Added interactive 3D visualization frontend built with React, Three.js, and Tailwind CSS
+- Added "See how it works" button in navbar linking to live demo at https://chronomem.vercel.app/
+- Added Vercel configuration for frontend deployment (`vercel.json`)
+- Added `start.sh` script for easy full-stack local development
