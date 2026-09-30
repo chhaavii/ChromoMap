@@ -41,9 +41,11 @@ This will:
 ```bash
 python3.11 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # then set ANTHROPIC_API_KEY (and LLM_MODEL if desired)
+cp .env.example .env   # optional: set ANTHROPIC_API_KEY for live LLM queries
 uvicorn app.main:app --reload --port 8000
 ```
+
+**Note**: The app works in demo mode without an API key, showing mock data for UI exploration. To enable live LLM queries, set `ANTHROPIC_API_KEY` in `.env`.
 
 **Frontend:**
 ```bash
@@ -114,6 +116,77 @@ The seed contains three chains: dating Rahul→Mohan, Dubai→Taipei,
 Acme→Nimbus Labs. Only explicit `DELETE /node/{id}` removes data (with an
 audit tombstone).
 
+## About ChronoMem
+
+ChronoMem is a **temporal AI memory system** that solves three fundamental problems with current AI memory:
+
+1. **Overwriting** - Old facts are replaced instead of preserved
+2. **Black box** - You can't see what the AI knows or why
+3. **Bubble** - Retrieval narrows around frequently discussed topics
+
+The solution is a **temporal knowledge graph** where facts are never overwritten—only superseded—so the AI can answer current, past, and change-over-time questions.
+
+### Core Innovation
+
+Instead of storing memory as a flat list that gets overwritten, ChronoMem stores memory as a **graph with time ranges**:
+
+- **Nodes** = people, places, topics, decisions
+- **Edges** = relationships with validity time ranges
+- **Supersession** = new facts close old connections instead of deleting them
+- **Hebbian learning** = frequently used connections strengthen, unused ones decay
+- **Personalized PageRank** = walks only relevant connections to save tokens
+
+### Key Features
+
+**Temporal Supersession**: When you say "I moved from Dubai to Taipei," the system creates a new edge for Taipei and closes the Dubai edge (superseded, not deleted). Can still answer: "Where did I live before?" → Dubai.
+
+**Hebbian Reinforcement & Decay**: Connections strengthen with use (capped at 5.0) and decay when idle (floor at 0.1). A background loop runs decay every 60 seconds. Configurable via environment variables.
+
+**Personalized PageRank Retrieval**: Instead of dumping full history into the prompt, the system walks only relevant connections. Top N nodes retrieved based on question, dramatically reducing token usage vs full dump.
+
+**Token Ledger**: Tracks tokens for every LLM call, shows cost per memory and per answer, compares strategies (full_dump vs flat_rag vs pagerank), and displays percentage savings.
+
+**Bubble Meter**: Measures Shannon entropy of retrieved nodes, detects when retrieval narrows around one topic, warns when AI is trapping you in a bubble. Analyzes last 20 queries.
+
+**User Control**: Pin (force memory into retrieval), Mute (exclude from PageRank), Delete (hard remove with audit tombstone).
+
+**Hash-Chained Audit Log**: Every operation logged in a tamper-evident chain. `/hashlog/verify` recomputes to detect tampering. Root hash proves integrity.
+
+**Interactive 3D Visualization**: React + Three.js brain-style graph. Rotate, zoom, click nodes. Timeline panel shows temporal events. Real-time updates.
+
+### How It Works - Example Flow
+
+1. **Ingest**: User says "I'm dating Rahul" → LLM extracts fact → creates node + edge → hash logged in audit chain
+2. **Update**: User says "We broke up, I'm with Mohan now" → Rahul edge closed (superseded) → Mohan edge created (current) → history preserved
+3. **Query**: "Who am I dating?" → PageRank walks graph → finds Mohan → returns answer with token cost
+4. **Temporal Query**: "Who did I date before?" → time-aware retrieval → finds Rahul → shows superseded connection
+5. **Hebbian Update**: As you ask about Mohan more → Mohan connection strengthens → Rahul connection slowly decays (but never below floor)
+6. **Bubble Detection**: If you only ask about one topic → entropy drops → bubble warning → break the bubble slider resurfaces neglected memories
+
+### Use Cases
+
+| Use Case | Example |
+|---|---|
+| **Personal AI assistant** | "Who did I date before Mohan?" from history |
+| **Students/researchers** | Track how thesis topic evolved over time |
+| **Mental health apps** | Journaling with changing feelings over time |
+| **Customer support** | Agent recalls customer's plan changes and why |
+| **Healthcare** | Patient medication/symptom history stays traceable |
+| **Enterprise AI budgets** | Teams see which memories burn most tokens |
+| **AI transparency** | Users audit and delete what AI knows about them |
+
+### What Makes It Stand Out
+
+The individual pieces (graph databases, PageRank, TF-IDF) exist elsewhere. The innovation is the **combination** built around one question:
+
+**"The same math that makes AI memory fast also makes it narrow—how do you get speed and openness at once?"**
+
+ChronoMem answers this with:
+- **Speed**: PageRank walks only relevant connections
+- **Openness**: History preserved via supersession, not deletion
+- **Transparency**: Token ledger + bubble meter + 3D visualization
+- **Control**: Pin, mute, delete user controls
+
 ## Tests
 
 ```bash
@@ -122,4 +195,26 @@ python -m pytest tests/ -v   # 40 tests: supersession, time-aware retrieval,
                              # deletion, bubble math, benchmark
 ```
 
+## Status
 
+- [x] Step 1 — DB models, `/memory/ingest` (supersession), `/graph`, `/hashlog/verify`, `/reset`
+- [x] Step 2 — `/ask` (pagerank + full_dump) + token accounting + `/ledger`
+- [x] Step 3 — `flat_rag` (TF-IDF) + `/ask/compare`
+- [x] Step 4 — Hebbian update, decay tick (+ 60s background loop), pin/mute/delete
+- [x] Step 5 — `/bubble` + influence scores
+- [x] Step 6 — `/seed` + `/benchmark/run`
+- [x] Step 7 — Hash chain + tamper detection tests
+- [x] Step 8 — Interactive 3D frontend with React + Three.js
+- [x] Step 9 — "See how it works" link to live demo
+
+## Recent Changes
+
+- Added comprehensive project overview explaining the core innovation and features
+- Added "About ChronoMem" section with detailed explanation of the system
+- Added "How It Works" example flow demonstrating the full lifecycle
+- Added use cases table showing real-world applications
+- Clarified that API key is optional for demo mode
+- Added interactive 3D visualization frontend built with React, Three.js, and Tailwind CSS
+- Added "See how it works" button in navbar linking to live demo at https://chronomem.vercel.app/
+- Added Vercel configuration for frontend deployment (`vercel.json`)
+- Added `start.sh` script for easy full-stack local development
