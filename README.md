@@ -122,21 +122,4 @@ python -m pytest tests/ -v   # 40 tests: supersession, time-aware retrieval,
                              # deletion, bubble math, benchmark
 ```
 
-## Status
 
-- [x] Step 1 — DB models, `/memory/ingest` (supersession), `/graph`, `/hashlog/verify`, `/reset`
-- [x] Step 2 — `/ask` (pagerank + full_dump) + token accounting + `/ledger`
-- [x] Step 3 — `flat_rag` (TF-IDF) + `/ask/compare`
-- [x] Step 4 — Hebbian update, decay tick (+ 60s background loop), pin/mute/delete
-- [x] Step 5 — `/bubble` + influence scores
-- [x] Step 6 — `/seed` + `/benchmark/run`
-- [x] Step 7 — Hash chain + tamper detection tests
-- [x] Step 8 — Interactive 3D frontend with React + Three.js
-- [x] Step 9 — "See how it works" link to live demo
-
-## Recent Changes
-
-- Added interactive 3D visualization frontend built with React, Three.js, and Tailwind CSS
-- Added "See how it works" button in navbar linking to live demo at https://chronomem.vercel.app/
-- Added Vercel configuration for frontend deployment (`vercel.json`)
-- Added `start.sh` script for easy full-stack local development
